@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Huấn luyện viên Kim Đồng - Morse & Semaphore PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9; 
+            touch-action: manipulation;
+        }
+        
+        .flag-pole { 
+            transform-origin: 100px 75px; 
+            transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+        }
+        
+        .btn-active { background-color: #166534 !important; color: white !important; }
+        .signal-on { background-color: #fbbf24 !important; box-shadow: 0 0 60px #fbbf24; transform: scale(1.05); }
+        
+        .mode-indicator {
+            @apply absolute top-5 left-5 px-4 py-1.5 text-white text-[10px] font-black rounded-full shadow-lg z-30 animate-pulse uppercase tracking-widest;
+        }
+
+        .ref-tab-active { @apply bg-green-800 text-white border-green-800 shadow-lg scale-105; }
+        
+        @keyframes wave-l { 0%, 100% { transform: rotate(135deg); } 50% { transform: rotate(155deg); } }
+        .animate-wave-l { animation: wave-l 0.25s ease-in-out infinite; }
+        @keyframes wave-r { 0%, 100% { transform: rotate(225deg); } 50% { transform: rotate(195deg); } }
+        .animate-wave-r { animation: wave-r 0.25s ease-in-out infinite; }
+
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        textarea { font-size: 16px !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .scout-bg-grid {
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body class="p-2 md:p-6 lg:p-10">
+    <div class="max-w-7xl mx-auto bg-white rounded-[2.5rem] md:rounded-[4rem] shadow-2xl overflow-hidden border border-slate-200">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-br from-green-950 via-green-800 to-green-700 p-8 text-white text-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 pointer-events-none text-white">
+                <svg width="100%" height="100%"><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/></pattern><rect width="100%" height="100%" fill="url(#grid)" /></svg>
+            </div>
+            <h1 class="text-2xl md:text-5xl font-black uppercase tracking-[0.3em] text-white drop-shadow-2xl">Huấn luyện viên Kim Đồng</h1>
+            <p class="text-[9px] md:text-sm opacity-80 mt-3 font-bold italic tracking-[0.4em] uppercase text-white">Nghiệp vụ Morse Còi Thép & Semaphore PRO v28.0</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex border-b bg-white sticky top-0 z-50 overflow-x-auto no-scrollbar shadow-sm">
+            <button onclick="switchTab('morse')" id="tab-morse" class="flex-1 py-6 font-black text-slate-400 hover:text-green-800 border-b-4 border-transparent transition-all uppercase text-[10px] md:text-sm tracking-widest px-4 whitespace-nowrap">Morse</button>
+            <button onclick="switchTab('semaphore')" id="tab-semaphore" class="flex-1 py-6 font-black text-slate-400 hover:text-green-800 border-b-4 border-transparent transition-all uppercase text-[10px] md:text-sm tracking-widest px-4 whitespace-nowrap">Semaphore</button>
+            <button onclick="switchTab('ref')" id="tab-ref" class="flex-1 py-6 font-black text-slate-400 hover:text-green-800 border-b-4 border-transparent transition-all uppercase text-[10px] md:text-sm tracking-widest px-4 whitespace-nowrap">Tra cứu</button>
+        </div>
+
+        <div class="p-4 md:p-10 bg-slate-50/50">
+            <!-- Morse Section -->
+            <div id="section-morse" class="space-y-10 animate-in fade-in duration-500">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="space-y-8">
+                        <!-- AI Config Card -->
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                            <label class="block font-black text-green-900 uppercase text-xs tracking-widest mb-6">Cấu hình rèn luyện AI</label>
+                            <div class="grid grid-cols-2 gap-6 mb-8">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 font-black block mb-2 uppercase tracking-widest">Số từ yêu cầu</span>
+                                    <input type="number" id="ai-words-morse" value="8" min="1" max="50" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold focus:border-green-600 focus:bg-white outline-none transition-all">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 font-black block mb-2 uppercase border-l pl-4 tracking-widest">Số chữ số</span>
+                                    <input type="number" id="ai-nums-morse" value="0" min="0" max="20" class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold focus:border-green-600 focus:bg-white outline-none transition-all">
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="generateAIContent('morse')" id="gen-ai-btn-morse" class="flex-1 bg-green-700 text-white font-black py-4 rounded-2xl hover:bg-green-800 transition shadow-xl flex items-center justify-center gap-3 text-xs tracking-widest uppercase">
+                                    SINH BẢN TIN AI
+                                </button>
+                                <button onclick="togglePractice('morse')" id="practice-btn-morse" class="px-10 border-2 border-orange-500 text-orange-600 font-black py-4 rounded-2xl hover:bg-orange-50 transition text-xs uppercase tracking-widest">Luyện</button>
+                            </div>
+                        </div>
+                        
+                        <div class="relative">
+                            <textarea id="morse-input" class="w-full p-8 border-2 border-slate-200 rounded-[2.5rem] h-48 resize-none focus:border-green-600 outline-none uppercase font-mono text-xl transition-all bg-white shadow-inner" placeholder="Nhập bản tin huấn luyện..."></textarea>
+                            <div id="morse-answer-box" class="hidden absolute inset-0 bg-slate-100/90 rounded-[2.5rem] flex flex-col items-center justify-center border-4 border-dashed border-slate-300 z-10 p-8 text-center font-black text-slate-400 uppercase tracking-widest text-sm">Nội dung đang ẩn</div>
+                            <div id="morse-loading" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center z-20">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 border-4 border-green-700 border-t-transparent rounded-full spinner mx-auto"></div>
+                                    <p class="text-[10px] font-black text-green-900 mt-5 tracking-widest uppercase">AI đang biên soạn...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="col-span-2 bg-slate-100 p-6 rounded-3xl border border-slate-200 shadow-inner">
+                                <div class="flex justify-between items-center mb-4">
+                                    <label class="font-black text-slate-600 text-[10px] uppercase tracking-widest">Tốc độ Morse (WPM)</label>
+                                    <span id="wpm-display" class="bg-green-700 text-white px-5 py-1.5 rounded-full font-black text-xs shadow-xl">10</span>
+                                </div>
+                                <input type="range" id="morse-wpm" min="5" max="30" value="10" class="w-full h-2.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-green-700">
+                            </div>
+                            <button onclick="playMorse()" id="btn-play-morse" class="bg-green-700 text-white py-6 rounded-[2rem] font-black hover:bg-green-800 transition shadow-2xl flex items-center justify-center gap-4 uppercase text-xs tracking-[0.3em]">
+                                PHÁT CÒI 3 LÁ THÉP
+                            </button>
+                            <button onclick="stopMorse()" class="bg-slate-800 text-white py-6 rounded-[2rem] font-black hover:bg-slate-900 transition shadow-lg uppercase text-xs tracking-widest">Dừng lại</button>
+                        </div>
+                        <button id="show-ans-morse" onclick="revealAnswer('morse')" class="hidden w-full py-6 bg-orange-600 text-white rounded-[2rem] font-black hover:bg-orange-700 shadow-2xl transition-all uppercase text-xs tracking-[0.3em]">Hiện đáp án bản tin</button>
+                    </div>
+
+                    <!-- Visualization -->
+                    <div class="bg-slate-950 rounded-[4rem] p-12 text-white flex flex-col items-center justify-center min-h-[500px] border-[16px] border-slate-900 shadow-2xl relative overflow-hidden">
+                        <div id="visual-signal" class="w-44 h-44 rounded-full bg-slate-900 transition-all duration-100 border-[12px] border-slate-800 flex items-center justify-center relative z-10 shadow-inner">
+                            <div class="w-24 h-24 rounded-full bg-slate-800 border-2 border-slate-700 shadow-inner"></div>
+                            <div class="absolute inset-0 bg-yellow-400/0 rounded-full transition-all duration-100" id="signal-glow"></div>
+                        </div>
+                        <div class="w-full text-center mt-12 relative z-10">
+                            <div id="morse-output" class="text-xl font-mono tracking-[0.8em] text-yellow-500 min-h-[1.5em] break-all opacity-40 italic"></div>
+                            <div id="morse-char-current" class="text-[12rem] font-black text-white mt-4 drop-shadow-[0_0_40px_rgba(255,255,255,0.3)] h-[180px] leading-none"></div>
+                        </div>
+                        <div class="absolute bottom-10 flex items-center gap-4 text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] z-10">
+                            <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_15px_red]"></span> RADIO CÒI NGHIỆP VỤ THẬT
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semaphore Section -->
+            <div id="section-semaphore" class="hidden space-y-10 animate-in fade-in duration-500">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="bg-slate-950 scout-bg-grid rounded-[4rem] flex flex-col items-center justify-center min-h-[600px] relative border-[16px] border-slate-900 shadow-2xl overflow-visible">
+                        <div id="mode-tag" class="mode-indicator bg-red-600 shadow-red-600/30">CHẾ ĐỘ SỐ</div>
+                        <svg width="100%" height="100%" viewBox="-120 -60 440 380" class="semaphore-container drop-shadow-2xl overflow-visible">
+                            <g id="scout-bars-ultimate">
+                                <ellipse cx="100" cy="220" rx="60" ry="15" fill="white" opacity="0.05" />
+                                <path d="M85 110 L115 110 L112 215 L88 215 Z" fill="#1e293b" />
+                                <rect x="80" y="55" width="40" height="65" rx="6" fill="#334155" />
+                                <path d="M88 55 L112 55 L100 85 Z" fill="#ef4444" />
+                                <circle cx="100" cy="38" r="18" fill="#fecaca" stroke="#1e293b" />
+                                <path d="M82 28 Q100 -15 118 28 Z" fill="#1e293b" />
+                            </g>
+                            <g id="arm-left-screen" class="flag-pole">
+                                <line x1="100" y1="70" x2="100" y2="210" stroke="#451a03" stroke-width="18" stroke-linecap="round" />
+                                <rect x="58" y="125" width="84" height="84" fill="#ffffff" stroke="#1e293b" stroke-width="0.5" />
+                                <path d="M58 125 L142 125 L58 209 Z" fill="#ef4444" />
+                            </g>
+                            <g id="arm-right-screen" class="flag-pole">
+                                <line x1="100" y1="70" x2="100" y2="210" stroke="#451a03" stroke-width="18" stroke-linecap="round" />
+                                <rect x="58" y="125" width="84" height="84" fill="#ffffff" stroke="#1e293b" stroke-width="0.5" />
+                                <path d="M58 125 L142 125 L58 214 Z" fill="#ef4444" />
+                            </g>
+                        </svg>
+                        <div id="sema-char-overlay" class="absolute bottom-16 right-16 text-[15rem] font-black text-white/5 italic select-none pointer-events-none"></div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                            <label class="block font-black text-slate-800 uppercase text-xs tracking-widest mb-6">Cấu hình Semaphore AI</label>
+                            <div class="grid grid-cols-2 gap-6 mb-8">
+                                <div><span class="text-[10px] text-slate-500 font-black block mb-2 uppercase">Số từ yêu cầu</span><input type="number" id="ai-words-sema" value="8" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-sm font-bold focus:border-blue-600 outline-none transition-all"></div>
+                                <div><span class="text-[10px] text-slate-500 font-black block mb-2 uppercase border-l pl-4 tracking-widest">Số chữ số</span><input type="number" id="ai-nums-sema" value="0" class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-4 text-sm font-bold focus:border-blue-600 outline-none transition-all"></div>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="generateAIContent('semaphore')" id="gen-ai-btn-sema" class="flex-1 bg-blue-700 text-white font-black py-4 rounded-2xl hover:bg-blue-800 transition shadow-xl text-xs uppercase tracking-widest">Sinh bản tin AI</button>
+                                <button onclick="togglePractice('semaphore')" id="practice-btn-sema" class="px-10 border-2 border-orange-500 text-orange-600 font-black py-4 rounded-2xl hover:bg-orange-50 transition text-xs uppercase tracking-widest">Luyện</button>
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            <textarea id="sema-input" class="w-full p-8 border-2 border-slate-200 rounded-[2.5rem] h-48 resize-none outline-none focus:border-blue-700 uppercase font-mono text-xl bg-white shadow-inner" placeholder="Bản tin Semaphore..."></textarea>
+                            <div id="sema-loading" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center z-20"><div class="w-12 h-12 border-4 border-blue-700 border-t-transparent rounded-full spinner"></div></div>
+                            <div id="sema-answer-box" class="hidden absolute inset-0 bg-slate-100/90 rounded-[2.5rem] flex items-center justify-center border-2 border-dashed border-slate-300 z-10 p-8 text-center font-black text-slate-400 uppercase tracking-widest text-xs">Bản tin đang ẩn</div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-slate-100 p-6 rounded-3xl border border-slate-200 shadow-inner">
+                                <div class="flex justify-between items-center mb-3">
+                                    <label class="font-black text-slate-500 text-[10px] uppercase tracking-widest">Độ trễ phất (ms)</label>
+                                    <span id="sema-speed-display" class="bg-blue-700 text-white px-5 py-1.5 rounded-full font-black text-xs shadow-xl">1000</span>
+                                </div>
+                                <input type="range" id="sema-speed" min="400" max="2500" step="100" value="1000" class="w-full h-2.5 bg-slate-300 rounded-lg appearance-none cursor-pointer accent-blue-700">
+                            </div>
+                            <button onclick="playSemaphore()" id="btn-play-sema" class="w-full bg-blue-700 text-white py-6 rounded-3xl font-black hover:bg-blue-800 transition shadow-2xl uppercase tracking-[0.4em] text-sm">Phát hiệu lệnh cờ</button>
+                            <button onclick="stopSemaphore()" class="w-full bg-slate-900 text-white py-5 rounded-[1.5rem] font-black hover:bg-black transition shadow-lg uppercase text-xs tracking-widest">Dừng lại</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reference Section -->
+            <div id="section-ref" class="hidden space-y-10 animate-in slide-in-from-bottom-5 duration-500">
+                <div class="flex flex-wrap gap-4 mb-10 p-2 bg-slate-200 rounded-[2.2rem] border shadow-inner">
+                    <button onclick="switchRefTab('morse')" id="btn-ref-morse" class="flex-1 px-5 py-5 rounded-[1.8rem] text-xs font-black uppercase transition-all ref-tab-active tracking-widest whitespace-nowrap">Tài liệu Morse Gốc</button>
+                    <button onclick="switchRefTab('semaphore')" id="btn-ref-semaphore" class="flex-1 px-5 py-5 rounded-[1.8rem] text-xs font-black uppercase transition-all tracking-widest whitespace-nowrap">Tài liệu Semaphore Gốc</button>
+                </div>
+                <div id="ref-morse" class="space-y-6">
+                    <div class="ref-card flex flex-col items-center bg-slate-50 shadow-inner">
+                        <img src="https://drive.google.com/thumbnail?id=1Rcou2G1_pK_cKLCwhPcG3mJYIR25OWiD&sz=w1200" class="w-full h-auto min-w-[800px] block rounded-3xl border-8 border-white shadow-2xl" alt="Morse Chart">
+                    </div>
+                </div>
+                <div id="ref-semaphore" class="hidden space-y-6">
+                    <div class="ref-card flex flex-col items-center bg-slate-50 shadow-inner">
+                        <img src="https://drive.google.com/thumbnail?id=1jtNFRsQqA36HTBMQ3LPZ6BxF4gOpZXhd&sz=w1200" class="w-full h-auto min-w-[800px] block rounded-3xl border-8 border-white shadow-2xl" alt="Semaphore Chart">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-100 p-8 text-center border-t border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">Hội đồng Đội Trung ương - Kim Đồng Ultimate v28.0</div>
+    </div>
+
+    <script>
+        const apiKey = ""; 
+        const ditFile = "tích.MP3"; 
+        const dahFile = "tè.MP3";   
+
+        // --- GLOBAL UTILS ---
+        function vietnameseToTelex(text) {
+            const map = { 'à': 'af', 'á': 'as', 'ả': 'ar', 'ã': 'ax', 'ạ': 'aj', 'â': 'aa', 'ầ': 'aaf', 'ấ': 'aas', 'ẩ': 'aar', 'ẫ': 'aax', 'ậ': 'aaj', 'ă': 'aw', 'ằ': 'awf', 'ắ': 'aws', 'ẳ': 'awr', 'ẵ': 'awx', 'ặ': 'awj', 'è': 'ef', 'é': 'es', 'ẻ': 'er', 'ẽ': 'ex', 'ẹ': 'ej', 'ê': 'ee', 'ề': 'eef', 'ế': 'ees', 'ể': 'eer', 'ễ': 'eex', 'ệ': 'eej', 'ì': 'if', 'í': 'is', 'ỉ': 'ir', 'ĩ': 'ix', 'ị': 'ij', 'ò': 'of', 'ó': 'os', 'ỏ': 'or', 'õ': 'ox', 'ọ': 'oj', 'ô': 'oo', 'ồ': 'oof', 'ố': 'oos', 'ổ': 'oor', 'ỗ': 'oox', 'ộ': 'ooj', 'ơ': 'ow', 'ờ': 'owf', 'ớ': 'ows', 'ở': 'owr', 'ỡ': 'owx', 'ợ': 'owj', 'ù': 'uf', 'ú': 'us', 'ủ': 'ur', 'ũ': 'ux', 'ụ': 'uj', 'ư': 'uw', 'ừ': 'uwf', 'ứ': 'uws', 'ử': 'uwr', 'ữ': 'uwx', 'ự': 'uwj', 'ỳ': 'yf', 'ý': 'ys', 'ỷ': 'yr', 'ỹ': 'yx', 'ỵ': 'yj', 'đ': 'dd' };
+            let res = (text || "").toLowerCase();
+            for (let [vn, telex] of Object.entries(map)) { res = res.replace(new RegExp(vn, 'g'), telex); }
+            return res.toUpperCase().replace(/[^A-Z0-9\s?.,/]/g, "");
+        }
+
+        const morseData = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--',
+            '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+            '9': '----.', '0': '-----'
+        };
+
+        const semaphoreData = {
+            'A': [45, 0],   'B': [90, 0],   'C': [135, 0],  'D': [180, 0],
+            'E': [0, 225],  'F': [0, 270],  'G': [0, 315],  
+            'H': [45, 90],  'I': [45, 135], 'K': [45, 180], 'L': [45, 225], 'M': [45, 270], 'N': [45, 315],
+            'O': [90, 135], 'P': [90, 180], 'Q': [90, 225], 'R': [90, 270], 'S': [90, 315],
+            'T': [135, 180], 'U': [135, 225], 'Y': [135, 270],
+            'J': [180, 270], 'V': [180, 315], 'W': [225, 270], 'X': [225, 315], 'Z': [270, 315],
+            '0':[180,270], '1':[45,0], '2':[90,0], '3':[135,0], '4':[180,0], '5':[0,225], '6':[0,270], '7':[0,315], '8':[45,90], '9':[45,135],
+            ' ': [0, 0], 'NUM': [180, 225], 'ALPHA': [180, 225], 'ATT': [135, 225], 'REST': [0, 0]
+        };
+
+        const digitToLetter = {'1':'A','2':'B','3':'C','4':'D','5':'E','6':'F','7':'G','8':'H','9':'I','0':'J'};
+
+        // --- ULTRA PRO SCOUT AUDIO ENGINE v28.0 ---
+        let audioCtx = null;
+        let ditBuffer = null;
+        let dahBuffer = null;
+
+        async function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+            
+            const loadFile = async (name) => {
+                try {
+                    const response = await fetch(encodeURI(name));
+                    if (!response.ok) return null;
+                    return await audioCtx.decodeAudioData(await response.arrayBuffer());
+                } catch (e) { return null; }
+            };
+
+            if (!ditBuffer) ditBuffer = await loadFile(ditFile);
+            if (!dahBuffer) dahBuffer = await loadFile(dahFile);
+        }
+
+        function playWhistle(isDit, duration, startTime) {
+            const buffer = isDit ? ditBuffer : dahBuffer;
+            if (buffer) {
+                // SỬ DỤNG TỆP MP3 THẬT GỐC
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(1.0, startTime + 0.002);
+                gain.gain.setValueAtTime(1.0, startTime + duration - 0.005);
+                gain.gain.linearRampToValueAtTime(0, startTime + duration);
+                source.connect(gain);
+                gain.connect(audioCtx.destination);
+                source.start(startTime);
+                source.stop(startTime + duration);
+            } else {
+                // BỘ GIẢ LẬP CÒI 3 LÁ THÉP SIÊU THỰC (Dự phòng)
+                const merger = audioCtx.createChannelMerger(2);
+                const masterGain = audioCtx.createGain();
+                const delay = audioCtx.createDelay();
+                delay.delayTime.value = 0.003; 
+
+                // Hiệu ứng hạt thép va đập (Flutter)
+                const lfo = audioCtx.createOscillator();
+                const lfoGain = audioCtx.createGain();
+                lfo.type = 'square'; // Sóng vuông tạo độ nhám mạnh cho hạt thép
+                lfo.frequency.setValueAtTime(35, startTime); 
+                lfoGain.gain.setValueAtTime(isDit ? 15 : 4, startTime); // Tè ổn định, Tích đanh
+                lfo.connect(lfoGain);
+
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                osc1.type = 'sine'; 
+                osc2.type = 'triangle'; // Triangle tạo độ đanh thép
+                
+                const baseFreq = 3200; // Tần số thép nghiệp vụ (Fox40 style)
+                osc1.frequency.setValueAtTime(baseFreq, startTime);
+                osc2.frequency.setValueAtTime(baseFreq + 5, startTime);
+                lfoGain.connect(osc1.frequency); 
+                lfoGain.connect(osc2.frequency);
+
+                const noise = audioCtx.createBufferSource();
+                const buf = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
+                const data = buf.getChannelData(0);
+                for(let i=0; i<buf.length; i++) data[i] = Math.random() * 2 - 1;
+                noise.buffer = buf; noise.loop = true;
+                const noiseFilter = audioCtx.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.setValueAtTime(baseFreq, startTime);
+                noiseFilter.Q.setValueAtTime(25, startTime); // Lọc hẹp tiếng rít thép
+
+                const noiseGain = audioCtx.createGain();
+                noiseGain.gain.setValueAtTime(isDit ? 0.2 : 0.08, startTime);
+
+                const attackTime = 0.004; 
+                const decayTime = 0.01; // Ngắt hơi cực nhanh bằng lưỡi
+                
+                masterGain.gain.setValueAtTime(0, startTime);
+                masterGain.gain.linearRampToValueAtTime(0.7, startTime + attackTime);
+                masterGain.gain.setValueAtTime(0.7, startTime + duration - decayTime);
+                masterGain.gain.linearRampToValueAtTime(0, startTime + duration); 
+
+                osc1.connect(masterGain); osc2.connect(masterGain);
+                noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(masterGain);
+                masterGain.connect(merger, 0, 0);
+                masterGain.connect(delay); delay.connect(merger, 0, 1);
+                merger.connect(audioCtx.destination);
+
+                osc1.start(startTime); osc2.start(startTime); noise.start(startTime); lfo.start(startTime);
+                osc1.stop(startTime + duration); osc2.stop(startTime + duration); noise.stop(startTime + duration); lfo.stop(startTime + duration);
+            }
+        }
+
+        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error(`Status: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                if (retries > 0) { await new Promise(r => setTimeout(r, backoff)); return fetchWithRetry(url, options, retries-1, backoff*2); }
+                throw error;
+            }
+        }
+
+        async function generateAIContent(target) {
+            const numWordsReq = parseInt(document.getElementById(`ai-words-morse`).value);
+            const numNumsReq = parseInt(document.getElementById(`ai-nums-morse`).value);
+            const loadingEl = document.getElementById(`${target}-loading`);
+            const inputEl = document.getElementById(`${target}-input`);
+            const btnEl = document.getElementById(`gen-ai-btn-morse`);
+            loadingEl.classList.remove('hidden'); btnEl.disabled = true;
+
+            const sys = `Bạn là Huấn luyện viên Kim Đồng. Soạn bản tin truyền tin Đội. QUY TẮC: 1. ĐÚNG ${numWordsReq} từ. 2. ĐÚNG ${numNumsReq} số. 3. Văn bản thuần, có dấu chuẩn.`;
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const data = await fetchWithRetry(url, { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `Soạn tin đúng ${numWordsReq} từ, có ${numNumsReq} số.` }] }], systemInstruction: { parts: [{ text: sys }] } }) 
+                });
+                let text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "SẴN SÀNG!";
+                let wordsArr = text.split(/\s+/).filter(w => w.length > 0);
+                if (wordsArr.length !== numWordsReq) {
+                    if (wordsArr.length > numWordsReq) text = wordsArr.slice(0, numWordsReq).join(' ');
+                    else while(wordsArr.length < numWordsReq) wordsArr.push("ĐỘI"); text = wordsArr.join(' ');
+                }
+                inputEl.value = text;
+                if (practiceActive[target]) document.getElementById(`${target}-answer-box`).classList.remove('hidden');
+            } catch (e) { inputEl.value = "LỖI KẾT NỐI AI."; } finally { loadingEl.classList.add('hidden'); btnEl.disabled = false; }
+        }
+
+        let isMorsePlaying = false;
+        async function playMorse() {
+            if (isMorsePlaying) return;
+            isMorsePlaying = true;
+            document.getElementById('btn-play-morse').disabled = true;
+            await initAudio(); 
+            const text = vietnameseToTelex(document.getElementById('morse-input').value);
+            const wpm = parseInt(document.getElementById('morse-wpm').value);
+            const dot = 1.5 / wpm; 
+            let scheduleTime = audioCtx.currentTime + 0.1;
+
+            const displayQueue = [];
+            const pulseQueue = [];
+
+            pulseQueue.push({ start: scheduleTime, end: scheduleTime + (dot * 8), char: '!!!', code: '' });
+            playWhistle(false, dot * 8, scheduleTime);
+            scheduleTime += (dot * 8) + (dot * 5);
+
+            for (let char of text) {
+                if (!isMorsePlaying) break;
+                if (char === ' ') { 
+                    displayQueue.push({ time: scheduleTime, char: '␣', code: '' });
+                    scheduleTime += dot * 7; continue; 
+                }
+                const code = morseData[char] || '';
+                displayQueue.push({ time: scheduleTime, char: practiceActive.morse ? '?' : char, code: practiceActive.morse ? '***' : code });
+                for (let i = 0; i < code.length; i++) {
+                    const isDit = (code[i] === '.');
+                    const duration = isDit ? dot : dot * 3;
+                    playWhistle(isDit, duration, scheduleTime);
+                    pulseQueue.push({ start: scheduleTime, end: scheduleTime + duration });
+                    scheduleTime += duration + (dot * 1.0); 
+                }
+                scheduleTime += (dot * 3.0) - (dot * 1.0); 
+            }
+
+            const arCode = ".-.-.";
+            displayQueue.push({ time: scheduleTime, char: 'AR', code: '.-.-.' });
+            for (let i = 0; i < arCode.length; i++) {
+                const isDit = (arCode[i] === '.');
+                const duration = isDit ? dot : dot * 3;
+                playWhistle(isDit, duration, scheduleTime);
+                pulseQueue.push({ start: scheduleTime, end: scheduleTime + duration });
+                scheduleTime += duration + (dot * 1.0);
+            }
+
+            const monitor = setInterval(() => {
+                const now = audioCtx.currentTime;
+                if (displayQueue.length > 0 && now >= displayQueue[0].time) {
+                    const item = displayQueue.shift();
+                    document.getElementById('morse-char-current').innerText = item.char;
+                    document.getElementById('morse-output').innerText = item.code;
+                }
+                let activePulse = pulseQueue.find(p => now >= p.start && now <= p.end);
+                if (activePulse) {
+                    document.getElementById('visual-signal').classList.add('signal-on');
+                    document.getElementById('signal-glow').style.opacity = "1";
+                } else {
+                    document.getElementById('visual-signal').classList.remove('signal-on');
+                    document.getElementById('signal-glow').style.opacity = "0";
+                }
+                if (now > scheduleTime || !isMorsePlaying) { clearInterval(monitor); stopMorse(); }
+            }, 20);
+        }
+        function stopMorse() { isMorsePlaying = false; document.getElementById('btn-play-morse').disabled = false; document.getElementById('morse-char-current').innerText = ''; document.getElementById('morse-output').innerText = ''; }
+
+        let isSemaPlaying = false; let semaTimer = null;
+        async function playSemaphore() {
+            if (isSemaPlaying) return;
+            isSemaPlaying = true;
+            document.getElementById('btn-play-sema').disabled = true;
+            const text = vietnameseToTelex(document.getElementById('sema-input').value);
+            const speed = parseInt(document.getElementById('sema-speed').value);
+            const modeTag = document.getElementById('mode-tag');
+            let isNumericMode = false;
+            let lastChar = null;
+
+            updateSemaFlags('ATT', false);
+            document.getElementById('arm-left-screen').classList.add('animate-wave-l');
+            document.getElementById('arm-right-screen').classList.add('animate-wave-r');
+            await new Promise(r => semaTimer = setTimeout(r, 2500));
+            document.getElementById('arm-left-screen').classList.remove('animate-wave-l');
+            document.getElementById('arm-right-screen').classList.remove('animate-wave-r');
+
+            for (let char of text) {
+                if (!isSemaPlaying) break;
+                if (char === lastChar && char !== ' ') {
+                    updateSemaFlags('REST', false);
+                    await new Promise(r => semaTimer = setTimeout(r, speed * 0.4));
+                }
+                if (char === ' ') { 
+                    if (isNumericMode) { isNumericMode = false; modeTag.classList.add('hidden'); updateSemaFlags('ALPHA'); await new Promise(r => semaTimer = setTimeout(r, speed * 1.5)); } 
+                    updateSemaFlags('REST'); await new Promise(r => semaTimer = setTimeout(r, speed * 2)); continue; 
+                }
+                if (/[0-9]/.test(char)) { 
+                    if (!isNumericMode) { updateSemaFlags('NUM'); modeTag.innerText = "CHẾ ĐỘ SỐ"; modeTag.classList.remove('hidden'); await new Promise(r => semaTimer = setTimeout(r, speed * 1.5)); isNumericMode = true; } 
+                    updateSemaFlags(digitToLetter[char], true, char); await new Promise(r => semaTimer = setTimeout(r, speed)); 
+                } else { 
+                    if (isNumericMode) { isNumericMode = false; modeTag.classList.add('hidden'); updateSemaFlags('ALPHA'); await new Promise(r => semaTimer = setTimeout(r, speed * 1.5)); } 
+                    updateSemaFlags(char); await new Promise(r => semaTimer = setTimeout(r, speed)); 
+                }
+                lastChar = char;
+            }
+            if(isSemaPlaying) {
+                updateSemaFlags('ATT', false);
+                document.getElementById('arm-left-screen').classList.add('animate-wave-l');
+                document.getElementById('arm-right-screen').classList.add('animate-wave-r');
+                await new Promise(r => semaTimer = setTimeout(r, 2000));
+                document.getElementById('arm-left-screen').classList.remove('animate-wave-l');
+                document.getElementById('arm-right-screen').classList.remove('animate-wave-r');
+            }
+            modeTag.classList.add('hidden'); stopSemaphore();
+        }
+        function stopSemaphore() { isSemaPlaying = false; clearTimeout(semaTimer); updateSemaFlags('REST'); document.getElementById('btn-play-sema').disabled = false; }
+        
+        function updateSemaFlags(key, showText = true, overrideText = null) {
+            const angles = semaphoreData[key] || [0, 0];
+            document.getElementById('arm-left-screen').style.transform = `rotate(${angles[0]}deg)`;
+            document.getElementById('arm-right-screen').style.transform = `rotate(${angles[1]}deg)`;
+            const overlay = document.getElementById('sema-char-overlay');
+            if (!showText || ['REST',' ','ATT','NUM','ALPHA'].includes(key)) overlay.innerText = '';
+            else overlay.innerText = practiceActive.semaphore ? '?' : (overrideText || key);
+        }
+
+        function switchTab(tab) {
+            ['morse', 'semaphore', 'ref'].forEach(t => { document.getElementById(`section-${t}`).classList.add('hidden'); document.getElementById(`tab-${t}`).classList.remove('btn-active'); });
+            document.getElementById(`section-${tab}`).classList.remove('hidden'); document.getElementById(`tab-${tab}`).classList.add('btn-active');
+            stopMorse(); stopSemaphore();
+        }
+        function switchRefTab(sub) {
+            ['morse', 'semaphore'].forEach(s => { document.getElementById(`ref-${s}`).classList.add('hidden'); document.getElementById(`btn-ref-${s}`).classList.remove('ref-tab-active'); });
+            document.getElementById(`ref-${sub}`).classList.remove('hidden'); document.getElementById(`btn-ref-${sub}`).classList.add('ref-tab-active');
+        }
+        let practiceActive = { morse: false, semaphore: false };
+        function togglePractice(mode) { practiceActive[mode] = !practiceActive[mode]; const btn = document.getElementById(`practice-btn-${mode === 'morse' ? 'morse' : 'sema'}`); const answerBox = document.getElementById(`${mode === 'morse' ? 'morse' : 'sema'}-answer-box`); const showAnsBtn = document.getElementById(`show-ans-${mode === 'morse' ? 'morse' : 'sema'}`); if (practiceActive[mode]) { btn.classList.add('bg-orange-600', 'text-white'); answerBox.classList.remove('hidden'); if(showAnsBtn) showAnsBtn.classList.remove('hidden'); generateAIContent(mode === 'morse' ? 'morse' : 'sema'); } else { btn.classList.remove('bg-orange-600', 'text-white'); answerBox.classList.add('hidden'); if(showAnsBtn) showAnsBtn.classList.add('hidden'); } }
+        function revealAnswer(mode) { document.getElementById(`${mode}-answer-box`).classList.add('hidden'); }
+
+        window.onload = () => { switchTab('morse'); updateSemaFlags('REST'); document.body.addEventListener('click', initAudio, {once: true}); };
+        document.getElementById('morse-wpm').addEventListener('input', (e) => document.getElementById('wpm-display').innerText = e.target.value);
+        document.getElementById('sema-speed').addEventListener('input', (e) => document.getElementById('sema-speed-display').innerText = e.target.value);
+    </script>
+</body>
+</html>
