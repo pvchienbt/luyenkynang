@@ -65,10 +65,19 @@
             <button onclick="switchTab('ref')" id="tab-ref" class="flex-1 py-2.5 md:py-4 font-black text-slate-400 hover:text-green-800 border-b-2 border-transparent transition-all uppercase text-[8px] md:text-xs tracking-widest">Tra cứu</button>
         </div>
 
-        <!-- Global API Setting -->
+        <!-- Global Password Setting -->
         <div class="bg-slate-100 px-3 py-1.5 border-b border-slate-200 flex items-center gap-2">
             <label for="api-key-input" class="text-[7px] md:text-[8px] font-black text-slate-500 uppercase whitespace-nowrap">password:</label>
-            <input type="password" id="api-key-input" class="flex-1 bg-white border border-slate-300 rounded px-2 py-0.5 text-[9px] md:text-[10px] outline-none focus:border-green-600 transition-colors shadow-sm" placeholder="Nhập mã bí mật để kết nối AI...">
+            <div class="flex-1 flex items-center bg-white border border-slate-300 rounded shadow-sm overflow-hidden">
+                <input type="password" id="api-key-input" oninput="checkApiInput(this)" class="flex-1 px-2 py-0.5 text-[9px] md:text-[10px] outline-none focus:bg-green-50/30 transition-colors" placeholder="Nhập mã bí mật từ hệ thống...">
+            </div>
+            <button id="login-btn" onclick="loginAutoSystem()" class="hidden bg-green-700 text-white px-3 py-0.5 rounded text-[8px] md:text-[10px] font-black uppercase hover:bg-green-800 transition shadow-sm">Đăng nhập</button>
+            <div id="login-loading" class="hidden"><div class="w-3 h-3 border-2 border-green-700 border-t-transparent rounded-full spinner"></div></div>
+            <div id="login-status" class="hidden text-green-700 text-[8px] md:text-[10px] font-black uppercase flex items-center gap-1">
+                <span class="bg-green-100 px-1.5 py-0.5 rounded border border-green-200">✓ Đã kết nối</span>
+                <button onclick="logoutAutoSystem()" class="text-red-600 ml-2 hover:underline">Thoát</button>
+            </div>
+            <div id="login-error" class="hidden text-red-600 text-[8px] md:text-[10px] font-black uppercase">Mật khẩu chưa đúng</div>
         </div>
 
         <div class="p-1.5 md:p-6 bg-slate-50/30">
@@ -76,25 +85,25 @@
             <div id="section-morse" class="space-y-3 animate-in fade-in duration-300">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
                     <div class="space-y-2">
-                        <!-- Strict Config Card -->
+                        <!-- Configuration -->
                         <div class="bg-white rounded-xl p-2 md:p-4 border border-slate-200 shadow-sm relative overflow-hidden">
                             <div class="flex items-center justify-between mb-2 px-1">
                                 <label class="font-black text-green-900 uppercase text-[8px] md:text-[10px]">Thiết lập bản tin</label>
                                 <div class="flex gap-2">
                                     <div class="flex items-center gap-1">
-                                        <span class="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase">Ít nhất:</span>
+                                        <span class="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase whitespace-nowrap">Ít nhất:</span>
                                         <input type="number" id="ai-words-morse" value="4" min="1" max="50" class="w-8 md:w-10 bg-slate-50 border border-slate-200 rounded px-1 text-[9px] font-bold text-center outline-none focus:border-green-600">
                                         <span class="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase">từ</span>
                                     </div>
                                     <div class="flex items-center gap-1">
-                                        <span class="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase">Ít nhất:</span>
+                                        <span class="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase whitespace-nowrap">Ít nhất:</span>
                                         <input type="number" id="ai-nums-morse" value="0" min="0" max="20" class="w-8 md:w-10 bg-slate-50 border border-slate-200 rounded px-1 text-[9px] font-bold text-center outline-none focus:border-green-600">
                                         <span class="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase">số</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex gap-1.5">
-                                <button onclick="generateAIContent('morse')" id="gen-ai-btn-morse" class="flex-1 bg-green-700 text-white font-black py-1.5 rounded-lg hover:bg-green-800 transition shadow-sm text-[8px] md:text-[10px] uppercase">Sinh bản tin AI</button>
+                                <button onclick="generateAutoContent('morse')" id="gen-auto-btn-morse" class="flex-1 bg-green-700 text-white font-black py-1.5 rounded-lg hover:bg-green-800 transition shadow-sm text-[8px] md:text-[10px] uppercase">Soạn tự động</button>
                                 <button onclick="togglePractice('morse')" id="practice-btn-morse" class="px-2 md:px-4 border border-orange-500 text-orange-600 font-black py-1.5 rounded-lg text-[8px] md:text-[10px] uppercase tracking-tighter">Luyện</button>
                             </div>
                         </div>
@@ -108,7 +117,7 @@
                             <div id="morse-loading" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center z-50">
                                 <div class="text-center">
                                     <div class="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full spinner mx-auto"></div>
-                                    <p class="text-[7px] font-black text-green-900 mt-1 uppercase tracking-tighter">AI đang soạn...</p>
+                                    <p class="text-[7px] font-black text-green-900 mt-1 uppercase tracking-tighter">đang soạn bản tin...</p>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +133,7 @@
                         <div class="grid grid-cols-2 gap-1.5">
                             <button onclick="playMorse()" id="btn-play-morse" class="bg-green-700 text-white py-2.5 md:py-3.5 rounded-lg font-black hover:bg-green-800 transition shadow-md text-[8px] md:text-[10px] tracking-widest uppercase">PHÁT CÒI</button>
                             <button onclick="stopMorse()" class="bg-slate-800 text-white py-2.5 md:py-3.5 rounded-lg font-black hover:bg-slate-900 transition shadow-sm text-[8px] md:text-[10px] uppercase">Dừng lại</button>
-                            <button id="show-ans-morse" onclick="revealAnswer('morse')" class="hidden col-span-2 py-2 bg-orange-600 text-white rounded-lg font-black text-[8px] md:text-[10px] uppercase shadow-lg">Hiện đáp án bản tin</button>
+                            <button id="show-ans-morse" onclick="revealAnswer('morse')" class="hidden col-span-2 py-2.5 bg-orange-600 text-white rounded-lg font-black text-[8px] md:text-[10px] uppercase shadow-lg">Hiện đáp án bản tin</button>
                         </div>
                     </div>
 
@@ -135,8 +144,7 @@
                             <div class="absolute inset-0 bg-yellow-400/0 rounded-full transition-all duration-75" id="signal-glow"></div>
                         </div>
                         <div class="w-full text-center mt-2 md:mt-8 relative z-10">
-                            <!-- Enlarged Morse symbols -->
-                            <div id="morse-output" class="text-2xl md:text-5xl font-black tracking-[0.4em] md:tracking-[0.6em] text-yellow-500/90 min-h-[1.2em] break-all italic leading-tight drop-shadow-lg"></div>
+                            <div id="morse-output" class="text-2xl md:text-5xl font-black tracking-[0.4em] md:tracking-[0.6em] text-yellow-500/90 min-h-[1.5em] break-all italic leading-tight drop-shadow-lg"></div>
                             <div id="morse-char-current" class="text-[3.5rem] md:text-[8rem] font-black text-white leading-none h-[40px] md:h-[110px] drop-shadow-2xl mt-1 uppercase"></div>
                         </div>
                     </div>
@@ -146,9 +154,9 @@
             <!-- Semaphore Section -->
             <div id="section-semaphore" class="hidden space-y-3 animate-in fade-in duration-300">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
-                    <div class="bg-slate-950 rounded-xl md:rounded-[2rem] flex flex-col items-center justify-center min-h-[200px] md:min-h-[450px] relative border-[4px] md:border-[10px] border-slate-900 shadow-2xl overflow-visible">
+                    <div class="bg-slate-950 rounded-xl md:rounded-[2rem] flex flex-col items-center justify-center min-h-[220px] md:min-h-[450px] relative border-[4px] md:border-[10px] border-slate-900 shadow-2xl overflow-visible">
                         <div id="mode-tag" class="mode-indicator bg-red-600 shadow-sm">CHẾ ĐỘ SỐ</div>
-                        <svg width="100%" height="100%" viewBox="-120 -60 440 380" class="semaphore-container drop-shadow-2xl overflow-visible max-h-[150px] md:max-h-full">
+                        <svg width="100%" height="100%" viewBox="-120 -60 440 380" class="semaphore-container drop-shadow-2xl overflow-visible max-h-[160px] md:max-h-full">
                             <g id="scout-silhouette">
                                 <ellipse cx="100" cy="220" rx="50" ry="12" fill="white" opacity="0.05" />
                                 <path d="M85 110 L115 110 L112 215 L88 215 Z" fill="#1e293b" />
@@ -187,13 +195,13 @@
                                 </div>
                             </div>
                             <div class="flex gap-1.5">
-                                <button onclick="generateAIContent('semaphore')" id="gen-ai-btn-sema" class="flex-1 bg-blue-700 text-white font-black py-1.5 rounded-lg hover:bg-blue-800 transition shadow-sm text-[8px] md:text-[10px] uppercase">Sinh bản tin AI</button>
+                                <button onclick="generateAutoContent('semaphore')" id="gen-auto-btn-sema" class="flex-1 bg-blue-700 text-white font-black py-1.5 rounded-lg hover:bg-blue-800 transition shadow-sm text-[8px] md:text-[10px] uppercase">Soạn tự động</button>
                                 <button onclick="togglePractice('semaphore')" id="practice-btn-sema" class="px-2 md:px-4 border border-orange-500 text-orange-600 font-black py-1.5 rounded-lg text-[8px] md:text-[10px] uppercase">Luyện</button>
                             </div>
                             <div id="sema-loading" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center z-50">
                                 <div class="text-center">
                                     <div class="w-4 h-4 border-2 border-blue-700 border-t-transparent rounded-full spinner mx-auto"></div>
-                                    <p class="text-[7px] font-black text-blue-900 mt-1 uppercase tracking-tighter">AI đang soạn...</p>
+                                    <p class="text-[7px] font-black text-blue-900 mt-1 uppercase tracking-tighter">đang soạn bản tin...</p>
                                 </div>
                             </div>
                         </div>
@@ -201,7 +209,7 @@
                         <div class="relative overflow-hidden rounded-xl">
                             <textarea id="sema-input" class="w-full p-2.5 border border-slate-200 rounded-xl h-20 md:h-32 resize-none outline-none focus:border-blue-700 font-mono text-[13px] bg-white leading-tight" placeholder="Bản tin Semaphore..."></textarea>
                             <div id="sema-answer-box" class="hidden absolute inset-0 opaque-cover flex items-center justify-center border-2 border-dashed border-slate-400 p-2 text-center">
-                                <span class="font-black text-white uppercase text-[8px] md:text-[11px] tracking-widest leading-none">BẢN TIN ĐANG ẨN TUYỆT ĐỐI</span>
+                                <span class="font-black text-white uppercase text-[10px] tracking-widest leading-none">BẢN TIN ĐANG ẨN TUYỆT ĐỐI</span>
                             </div>
                         </div>
 
@@ -222,7 +230,7 @@
                 </div>
             </div>
 
-            <!-- Reference Section -->
+            <!-- Tài liệu -->
             <div id="section-ref" class="hidden space-y-2 animate-in slide-in-from-bottom-5 duration-300">
                 <div class="flex gap-2 p-1 bg-slate-200 rounded-xl shadow-inner">
                     <button onclick="switchRefTab('morse')" id="btn-ref-morse" class="flex-1 px-3 py-1.5 rounded-lg text-[8px] md:text-[10px] font-black uppercase transition-all ref-tab-active">Morse Gốc</button>
@@ -243,8 +251,79 @@
     <script>
         const ditFile = "tích.MP3"; 
         const dahFile = "tè.MP3";   
-        // Variable for the key provided by the environment
-        const systemApiKey = ""; 
+        
+        let isLoggedIn = false;
+        let activeApiKey = "";
+        const apiPrefix = "gen-lang-client-";
+        const systemModel = "gemini-2.5-flash-preview-09-2025";
+
+        function checkApiInput(input) {
+            const btn = document.getElementById('login-btn');
+            const error = document.getElementById('login-error');
+            error.classList.add('hidden');
+            if (!isLoggedIn && input.value.trim() !== "") {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        async function loginAutoSystem() {
+            const input = document.getElementById('api-key-input');
+            const btn = document.getElementById('login-btn');
+            const loading = document.getElementById('login-loading');
+            const error = document.getElementById('login-error');
+            const rawKey = input.value.trim();
+
+            if (rawKey === "") return;
+
+            btn.classList.add('hidden');
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+
+            // DETECT CORRECT KEY FORMAT
+            let fullKey = rawKey;
+            // Only prepend if it doesn't already look like a standard key
+            if (!rawKey.startsWith("AIza") && !rawKey.startsWith(apiPrefix)) {
+                fullKey = apiPrefix + rawKey;
+            }
+
+            try {
+                // TEST CALL WITH THE CORRECT MODEL ENDPOINT
+                const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/${systemModel}:generateContent?key=${fullKey}`;
+                const response = await fetch(testUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "p" }] }] })
+                });
+
+                if (response.ok) {
+                    activeApiKey = fullKey;
+                    isLoggedIn = true;
+                    input.disabled = true;
+                    loading.classList.add('hidden');
+                    document.getElementById('login-status').classList.remove('hidden');
+                } else {
+                    const errorData = await response.json();
+                    console.error("Auth Failure:", errorData);
+                    throw new Error("Invalid Key");
+                }
+            } catch (e) {
+                loading.classList.add('hidden');
+                btn.classList.remove('hidden');
+                error.classList.remove('hidden');
+            }
+        }
+
+        function logoutAutoSystem() {
+            const input = document.getElementById('api-key-input');
+            input.disabled = false;
+            input.value = "";
+            isLoggedIn = false;
+            activeApiKey = "";
+            document.getElementById('login-status').classList.add('hidden');
+            document.getElementById('login-btn').classList.add('hidden');
+        }
 
         function vietnameseToTelex(text) {
             const map = { 'à': 'af', 'á': 'as', 'ả': 'ar', 'ã': 'ax', 'ạ': 'aj', 'â': 'aa', 'ầ': 'aaf', 'ấ': 'aas', 'ẩ': 'aar', 'ẫ': 'aax', 'ậ': 'aaj', 'ă': 'aw', 'ằ': 'awf', 'ắ': 'aws', 'ẳ': 'awr', 'ẵ': 'awx', 'ặ': 'awj', 'è': 'ef', 'é': 'es', 'ẻ': 'er', 'ẽ': 'ex', 'ẹ': 'ej', 'ê': 'ee', 'ề': 'eef', 'ế': 'ees', 'ể': 'eer', 'ễ': 'eex', 'ệ': 'eej', 'ì': 'if', 'í': 'is', 'ỉ': 'ir', 'ĩ': 'ix', 'ị': 'ij', 'ò': 'of', 'ó': 'os', 'ỏ': 'or', 'õ': 'ox', 'ọ': 'oj', 'ô': 'oo', 'ồ': 'oof', 'ố': 'oos', 'ổ': 'oor', 'ỗ': 'oox', 'ộ': 'ooj', 'ơ': 'ow', 'ờ': 'owf', 'ớ': 'ows', 'ở': 'owr', 'ỡ': 'owx', 'ợ': 'owj', 'ù': 'uf', 'ú': 'us', 'ủ': 'ur', 'ũ': 'ux', 'ụ': 'uj', 'ư': 'uw', 'ừ': 'uwf', 'ứ': 'uws', 'ử': 'uwr', 'ữ': 'uwx', 'ự': 'uwj', 'ỳ': 'yf', 'ý': 'ys', 'ỷ': 'yr', 'ỹ': 'yx', 'ỵ': 'yj', 'đ': 'dd' };
@@ -328,27 +407,32 @@
             }
         }
 
-        async function generateAIContent(target) {
+        async function generateAutoContent(target) {
             const modeId = (target === 'morse') ? 'morse' : 'sema';
+            const inputEl = document.getElementById(`${modeId}-input`);
+
+            if (!isLoggedIn) {
+                inputEl.value = "Vui lòng nhập password";
+                return;
+            }
+
             const minWords = parseInt(document.getElementById(`ai-words-${modeId}`).value);
             const minNums = parseInt(document.getElementById(`ai-nums-${modeId}`).value);
             const loadingEl = document.getElementById(`${modeId}-loading`);
-            const inputEl = document.getElementById(`${modeId}-input`);
-            const userKey = document.getElementById('api-key-input').value;
             
-            const currentKey = userKey || systemApiKey;
-
             loadingEl.classList.remove('hidden'); 
-            const sys = `Bạn là Huấn luyện viên Kim Đồng chuyên nghiệp. Hãy soạn một thông điệp hoặc câu khẩu hiệu truyền tin hoàn chỉnh dùng cho sinh hoạt Đội Thiếu niên Tiền phong Hồ Chí Minh. CHỦ ĐỀ: Truyền thống Đội, Đoàn, lòng biết ơn Bác Hồ kính yêu, tình yêu Tổ quốc, gương anh hùng nhỏ tuổi (Kim Đồng, Lê Văn Tám, Võ Thị Sáu), hoặc phong trào thi đua Cháu ngoan Bác Hồ. YÊU CẦU: 1. Nội dung phải HOÀN CHỈNH, MẠCH LẠC, CÓ Ý NGHĨA. 2. Số lượng từ phải ÍT NHẤT LÀ ${minWords} từ nhưng CỐ GẮNG GẦN NHẤT VỚI CON SỐ NÀY (ngắn gọn, súc tích). 3. Chèn ÍT NHẤT ${minNums} con số ngẫu nhiên. 4. KHÔNG lời dẫn, KHÔNG tiêu đề. Chỉ trả về nội dung tiếng Việt có dấu.`;
+            const sys = `Bạn là Huấn luyện viên Kim Đồng chuyên nghiệp. Hãy soạn một thông điệp truyền tin hoàn chỉnh dùng cho sinh hoạt Đội Thiếu niên Tiền phong Hồ Chí Minh. CHỦ ĐỀ: Truyền thống Đội, Đoàn, lòng biết ơn Bác Hồ kính yêu, tình yêu Tổ quốc, gương các anh hùng nhỏ tuổi (Kim Đồng, Lê Văn Tám, Võ Thị Sáu), hoặc phong trào thi đua Cháu ngoan Bác Hồ. YÊU CẦU: 1. Nội dung phải HOÀN CHỈNH, MẠCH LẠC, CÓ Ý NGHĨA. 2. Số lượng từ phải ÍT NHẤT LÀ ${minWords} từ nhưng CỐ GẦN NHẤT VỚI CON SỐ NÀY. 3. Chèn ÍT NHẤT ${minNums} con số ngẫu nhiên. 4. KHÔNG lời dẫn, KHÔNG tiêu đề. Chỉ trả về nội dung tiếng Việt có dấu.`;
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${currentKey}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${systemModel}:generateContent?key=${activeApiKey}`;
                 const data = await fetchWithRetry(url, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ contents: [{ parts: [{ text: `Hãy soạn bản tin có ít nhất ${minWords} từ và ${minNums} số.` }] }], systemInstruction: { parts: [{ text: sys }] } }) 
                 });
                 
+                if (data.error) throw new Error(data.error.message);
+
                 let text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "SẴN SÀNG!";
                 let wordsArr = text.split(/\s+/).filter(w => w.length > 0);
                 
@@ -361,7 +445,7 @@
                 }
                 inputEl.value = text;
             } catch (e) { 
-                inputEl.value = "Vui lòng nhập password"; 
+                inputEl.value = "Hệ thống gặp lỗi. Vui lòng kiểm tra lại Password hoặc mạng."; 
             } finally { 
                 loadingEl.classList.add('hidden'); 
             }
@@ -477,11 +561,18 @@
         function togglePractice(mode) { 
             const m = (mode === 'morse') ? 'morse' : 'semaphore';
             const id = (mode === 'morse') ? 'morse' : 'sema';
+            const inputEl = document.getElementById(`${id}-input`);
+
+            if (!isLoggedIn) {
+                inputEl.value = "Vui lòng nhập password";
+                return;
+            }
+
             practiceActive[m] = !practiceActive[m]; 
             const btn = document.getElementById(`practice-btn-${id}`); 
             const answerBox = document.getElementById(`${id}-answer-box`); 
             const showAnsBtn = document.getElementById(`show-ans-${id}`); 
-            if (practiceActive[m]) { btn.classList.add('bg-orange-600', 'text-white'); answerBox.classList.remove('hidden'); if(showAnsBtn) showAnsBtn.classList.remove('hidden'); generateAIContent(mode); } 
+            if (practiceActive[m]) { btn.classList.add('bg-orange-600', 'text-white'); answerBox.classList.remove('hidden'); if(showAnsBtn) showAnsBtn.classList.remove('hidden'); generateAutoContent(mode); } 
             else { btn.classList.remove('bg-orange-600', 'text-white'); answerBox.classList.add('hidden'); if(showAnsBtn) showAnsBtn.classList.add('hidden'); } 
         }
 
